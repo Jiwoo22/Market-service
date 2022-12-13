@@ -1,10 +1,12 @@
 import { v4 as uuid } from "uuid";
 import AWS from "aws-sdk";
+import commonMiddleware from "../../lib/commonMiddleware";
+import createError from "http-errors";
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 async function postItem(event, context) {
-  const { title, price } = JSON.parse(event.body);
+  const { title, price } = event.body;
   const now = new Date();
 
   const item = {
@@ -32,4 +34,4 @@ async function postItem(event, context) {
   };
 }
 
-export const handler = postItem;
+export const handler = commonMiddleware(postItem);

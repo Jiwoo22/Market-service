@@ -1,0 +1,33 @@
+service: market-service
+
+plugins:
+  - serverless-esbuild
+  - serverless-pseudo-parameters
+
+custom:
+  MarketTable:
+    name: !Ref MarketTable
+    arn: !GetAtt MarketTable.Arn
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region: us-west-1
+  environment:
+    MARKET_TABLE_NAME: ${self:custom.MarketTable.name}
+  iamRoleStatements:
+    - ${file(iam/MarketTableIAM.yml):MarketTableIAM}
+
+resources:
+  Resources:
+    MarketTable: ${file(resources/MarketTable.yml):MarketTable}
+
+functions:
+  postItem:
+    handler: src/handlers/postItem.handler
+    events:
+      - http:
+          method: POST
+          path: /item

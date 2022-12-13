@@ -31,3 +31,24 @@ functions:
       - http:
           method: POST
           path: /item
+
+  getItems:
+    handler: src/handlers/getItems.handler
+    events:
+      - http:
+          method: GET
+          path: /items
+
+  getItem:
+    handler: src/handlers/getItem.handler
+    events:
+      - http:
+          method: GET
+          path: /item/{id}
+
+  placeBid:
+    handler: src/handlers/placeBid.handler
+    events:
+      - http:
+          method: PATCH
+          path: /item/{id}/bid

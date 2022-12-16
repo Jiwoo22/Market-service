@@ -1,0 +1,18 @@
+MarketTableIAM:
+  Effect: Allow
+  Action:
+    - dynamodb:PutItem
+    - dynamodb:Scan
+    - dynamodb:GetItem
+    - dynamodb:UpdateItem
+    - dynamodb:Query
+  Resource:
+    - ${self:custom.MarketTable.arn}
+    - !Join [
+        "/",
+        ["${self:custom.MarketTable.arn}", "index", "statusAndEndDate"],
+      ]
+    - !Join [
+        "/",
+        ["${self:custom.MarketTable.arn}", "index", "seller-endingAt"],
+      ]

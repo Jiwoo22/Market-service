@@ -6,10 +6,11 @@ import createError from "http-errors";
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 async function postItem(event, context) {
+  const { email } = event.requestContext.authorizer;
   const { title, price, detail } = event.body;
   const now = new Date();
   const endDate = new Date();
-  endDate.setHours(now.getHours() + 148); // 7 days to post if no one bid on it
+  endDate.setHours(now.getHours() + 72); // 3 days to post if no one bid on it
 
   const item = {
     id: uuid(),
@@ -22,6 +23,7 @@ async function postItem(event, context) {
     status: "OPEN",
     createdAt: now.toISOString(),
     endingAt: endDate.toISOString(),
+    seller: email,
   };
 
   try {

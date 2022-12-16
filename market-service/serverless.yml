@@ -8,6 +8,9 @@ custom:
   MarketTable:
     name: !Ref MarketTable
     arn: !GetAtt MarketTable.Arn
+  authorizer: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:auth-service-${self:provider.stage}-auth
+  bundle:
+    linting: false
 
 provider:
   name: aws
@@ -31,6 +34,8 @@ functions:
       - http:
           method: POST
           path: /item
+          cors: true
+          authorizer: ${self:custom.authorizer}
 
   getItems:
     handler: src/handlers/getItems.handler
@@ -38,6 +43,8 @@ functions:
       - http:
           method: GET
           path: /items
+          cors: true
+          authorizer: ${self:custom.authorizer}
 
   getItem:
     handler: src/handlers/getItem.handler
@@ -45,6 +52,8 @@ functions:
       - http:
           method: GET
           path: /item/{id}
+          cors: true
+          authorizer: ${self:custom.authorizer}
 
   placeBid:
     handler: src/handlers/placeBid.handler
@@ -52,3 +61,19 @@ functions:
       - http:
           method: PATCH
           path: /item/{id}/bid
+          cors: true
+          authorizer: ${self:custom.authorizer}
+
+  getItemsBySeller:
+    handler: src/handlers/getItemsBySeller.handler
+    events:
+      - http:
+          method: GET
+          path: /seller
+          cors: true
+          authorizer: ${self:custom.authorizer}
+
+  processItems:
+    handler: src/handlers/processItems.handler
+    events:
+      - schedule: rate(1 minute)

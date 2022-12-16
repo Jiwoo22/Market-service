@@ -6,20 +6,20 @@ import { getItemById } from "./getItem";
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 async function placeBid(event, context) {
-  const { id } = event.pathParameters;
   const { amount } = event.body;
+  const { email } = event.requestContext.authorizer;
 
   const item = await getItemById(id);
 
   // Bid identity validation
-  //   if (email === item.seller) {
-  //     throw new createError.Forbidden(`You cannot bid on your own auctions`);
-  //   }
+  if (email === item.seller) {
+    throw new createError.Forbidden(`You cannot bid on your own auctions`);
+  }
 
-  //   // Avoid double bidding
-  //   if (email === item.highestBid.bidder) {
-  //     throw new createError.Forbidden(`You are already the highest bidder`);
-  //   }
+  // Avoid double bidding
+  if (email === item.highestBid.bidder) {
+    throw new createError.Forbidden(`You are already the highest bidder`);
+  }
 
   // Auction status validation
   if (item.status !== "OPEN") {
@@ -35,15 +35,17 @@ async function placeBid(event, context) {
 
   const now = new Date();
   const endDate = new Date();
-  endDate.setHours(now.getHours() + 48); // 2 days to post after first bidding
+  endDate.setHours(now.getHours() + 24); // 2 days to post after first bidding
 
   const params = {
     TableName: process.env.MARKET_TABLE_NAME,
     Key: { id },
-    UpdateExpression: "set highestBid.amount = :amount,  endingAt = :endDate",
+    UpdateExpression:
+      "set highestBid.amount = :amount, highestBid.bidder = :bidder, endingAt = :endDate",
     ExpressionAttributeValues: {
       ":amount": amount,
       ":endDate": endDate.toISOString(),
+      ":bidder": email,
     },
     ReturnValues: "ALL_NEW",
   };
